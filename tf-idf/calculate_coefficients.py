@@ -12,10 +12,4 @@ if len(sys.argv) < 4:
 output_file = sys.argv[1]
 input_files = sys.argv[2:]
 
-frequencies_unique_words_of_texts = []
-
-for input_file in input_files:
-    raw_text = read_all_in_lowercase(input_file)
-    text = Text(raw_text)
-    freq_words = text.get_frequencies_unique_words()
-    frequencies_unique_words_of_texts.append(freq_words)
+texts = map(lambda in_file: Text(read_all_in_lowercase(in_file)), input_files)

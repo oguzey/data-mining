@@ -78,33 +78,6 @@ class Text(object):
         self.unique_words = None
         self.ngrams = {}
 
-    # depricated
-    def __calculate_frequencies_unique_words(self):
-        all_words = 0
-        freq = {}
-        for word in self.words:
-            assert len(word) > 0, "Can be empty string"
-            all_words += 1
-            if freq.get(word) is None:
-                freq[word] = 0
-            freq[word] += 1
-        self.amount_words = all_words
-        self.unique_words = freq
-        assert self.amount_words, "Error happens during calc of frequencies"
-        assert self.unique_words, "Error happens during calc amount words"
-
-    # depricated
-    def get_frequencies_unique_words(self):
-        if not self.unique_words:
-            self.__calculate_frequencies_unique_words()
-        return self.unique_words
-
-    # depricated
-    def get_amount_unique_words(self):
-        if not self.amount_words:
-            self.__calculate_frequencies_unique_words()
-        return self.amount_words
-
     def get_ngrams(self, type_ngram):
         assert isinstance(type_ngram, TypeNGram), "Invalid type of param"
         ngrams = self.ngrams.get(type_ngram)
