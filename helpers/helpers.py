@@ -78,6 +78,10 @@ class Text(object):
         self.unique_words = None
         self.ngrams = {}
 
+    def __eq__(self, other_text):
+        print "call __eq__"
+        return id(self) == id(other_text)
+
     def get_ngrams(self, type_ngram):
         assert isinstance(type_ngram, TypeNGram), "Invalid type of param"
         ngrams = self.ngrams.get(type_ngram)
