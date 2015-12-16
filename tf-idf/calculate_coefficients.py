@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import division
 import sys
 import math
-from __future__ import division
+import os
 from operator import itemgetter
-# sys.path.append('helpers')
-from helpers.helpers import *
+sys.path.append('helpers')
+from helpers import *
+# from helpers.helpers import *
 
 
 def calc_tf(ngram, ngrams):
@@ -23,19 +25,32 @@ def calc_idf(ngram, texts_ngrams):
         ngram           - [string] certain ngram
         texts_ngrams    - [list of NGram] all ngrams of all texts
     """
-    def is_text_contain_ngram(ngrams): ngrams.get(ngram) is not None
-    amount_matching = math.sum(map(is_text_contain_ngram, texts_ngrams))
+    amount_matching = sum(
+        map(
+            lambda ngrams: ngrams.freq_uniques.get(ngram) is not None,
+            texts_ngrams
+            )
+        )
+    return math.log(len(texts_ngrams) / amount_matching, 10)
 
-    return amount_matching / len(texts_ngrams)
 
-if len(sys.argv) < 4:
+if len(sys.argv) < 3:
     print "Invalid amount of arguments."
-    print "Expect a output file and two input files as minimum."
+    print "Expect a output file and directory for input files."
     exit(1)
 
 output_file = sys.argv[1]
-input_files = sys.argv[2:]
+input_dir = sys.argv[2]
 
+if not os.path.isdir(input_dir):
+    print "Provided path '%s' is not directory."
+    exit(1)
+
+input_files = [
+    os.path.join("", input_dir, fname)
+    for fname in os.listdir(input_dir)
+    ]
+print "Will handle next files " + str(input_files)
 texts = map(lambda in_file: Text(read_all_in_lowercase(in_file)), input_files)
 texts_unigrams = map(lambda text: text.get_ngrams(TypeNGram.UNIGRAMS), texts)
 
@@ -43,6 +58,7 @@ texts_unigrams = map(lambda text: text.get_ngrams(TypeNGram.UNIGRAMS), texts)
 tf_idfs = {}
 
 for index in xrange(len(texts)):
+    print "Calculate tf-idf for '{0}'...".format(input_files[index]),
     tf_idfs_text = {}
     ngrams = texts_unigrams[index]
     unigrams = ngrams.freq_uniques.keys()
@@ -52,9 +68,28 @@ for index in xrange(len(texts)):
         tf_idfs_text[unigram] = tf * idf
 
     tf_idfs[input_files[index]] = tf_idfs_text
+    print "   OK"
 
+# first element for filenames
+strs_output = ['']
+processed_texts = 0
 
-for key, coefs in tf_idfs.items():
-    tf_idfs[key] = sorted(coefs.items(), key=itemgetter(1), reverse=True)
+for filename, coefs in tf_idfs.items():
+    print "Create report for '{0}'...".format(filename),
+    pairs = sorted(coefs.items(), key=itemgetter(1), reverse=True)
+    tf_idfs[filename] = pairs
+    strs_output[0] += filename + ";;"
 
+    for index in xrange(len(pairs)):
+        new_pease = ";".join(map(str, pairs[index])) + ";"
+        try:
+            strs_output[index + 1] += new_pease
+        except IndexError:
+            strs_output.append(processed_texts * ";;" + new_pease)
 
+    processed_texts += 1
+    print "   OK"
+
+with open(output_file, 'w') as f:
+    for row in strs_output:
+        f.write(row + os.linesep)

@@ -10,8 +10,10 @@ def read_all_in_lowercase(filename):
     return text.decode("utf-8").lower().encode("utf-8")
 
 
-def write_pairs_to_file(filename, pairs):
-    with open(filename, 'w') as f:
+def write_pairs_to_file(filename, pairs, nameinfile=None, rewrite=True):
+    with open(filename, 'w' if rewrite else 'a') as f:
+        if nameinfile:
+            f.write(str(nameinfile) + os.linesep)
         for pair in pairs:
             f.write(";".join(map(str, pair)) + os.linesep)
 
